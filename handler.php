@@ -6,32 +6,17 @@ require_once "vendor/autoload.php";
 use Zanzara\Zanzara;
 use Zanzara\Context;
 
-$bot = new Zanzara($_CONFIG['TOKEN']);
-
-$bot->onCommand("start", function (Context $ctx) {
-    $ctx->sendMessage("Hi, what's your name?");
-    $ctx->nextStep("checkName");
-});
-
-function checkName(Context $ctx)
-{
-    $name = $ctx->getMessage()->getText();
-    $ctx->setUserDataItem('name', $name);
-    $ctx->sendMessage("Hi $name, what is your age?");
-    $ctx->nextStep("checkAge");
-}
-
-function checkAge(Context $ctx)
-{
-    $age = $ctx->getMessage()->getText();
-    if (ctype_digit($age)) {
-        $ctx->getUserDataItem('name')->then(function ($name) use ($ctx) {
-            // ... save user data on MySql
-            $ctx->sendMessage("Ok $name perfect, bye");
-            $ctx->endConversation(); // clean the state for this conversation
-        });
-    } else {
-        $ctx->sendMessage("Must be a number, retry");
+$telegram = new Zanzara($_CONFIG['TOKEN']);
+$telegram->onMessage(function(Context $bot) use ($telegram,$_CONFIG){
+    require_once "Bot/Message/User.php";
+    if(in_array($bot->getMessage()->getChat()->getId(),$_CONFIG['ADMIN'])){
+        require_once "Bot/Message/Admin.php";
     }
-}
-$bot->run();
+});
+$telegram->onCbQuery(function(Context $bot)use ($telegram,$_CONFIG){
+    require_once "Bot/CallBack/User.php";
+    if(in_array($bot->getMessage()->getChat()->getId(),$_CONFIG['ADMIN'])){
+        require_once "Bot/CallBack/Admin.php";
+    }
+});
+$telegram->run();
