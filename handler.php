@@ -1,7 +1,7 @@
 <?php
 define('BASE',__DIR__);
-require_once "vendor/autoload.php";
 require_once "Config/Config.php";
+require_once "vendor/autoload.php";
 
 use Zanzara\Zanzara;
 use Zanzara\Context;
